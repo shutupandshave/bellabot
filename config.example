@@ -3,10 +3,13 @@ var Configuration =
     Discord: {
       ClientToken: "",
       ServerID: "",
-      DebugChannelID: ""
+      DebugChannelID: "",
+      BlacklistRoleID: "",
+      MorteRole: "",
     },
     HTTP: {
       Port: 80,
+      Hostname: ''
     },
     ESI: {
       ClientID: '',
