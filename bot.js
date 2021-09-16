@@ -73,21 +73,27 @@ const requestListener = async function (request, response) {
         var allianceInfo = await EsiApi.GetAllianceInfo(characterInfo.alliance_id);
         var corporationInfo = await EsiApi.GetCorporationInfo(characterInfo.corporation_id);
 
-        link.query(
-          'INSERT INTO alliances (id, name, ticker) VALUES (' + characterInfo.alliance_id + ", '" + allianceInfo.name + "', '" + allianceInfo.ticker + "')",
-          (e, r) => {
-            if (e && e.errno !== 1062) {
-              throw e;
+        let allianceID = null;
+
+        if(characterInfo.alliance_id)
+        {
+          allianceID = characterInfo.alliance_id;
+          link.query(
+            'INSERT INTO alliances (id, name, ticker) VALUES (' + characterInfo.alliance_id + ", '" + allianceInfo.name + "', '" + allianceInfo.ticker + "')",
+            (e, r) => {
+              if (e && e.errno !== 1062) {
+                throw e;
+              }
             }
-          }
-        );
+          );
+        }
         link.query(
           'INSERT INTO corporations (id, name, allianceID, ticker) VALUES (' +
             characterInfo.corporation_id +
             ", '" +
             corporationInfo.name +
             "', " +
-            corporationInfo.alliance_id +
+            allianceID +
             ", '" +
             corporationInfo.ticker +
             "')",
@@ -224,7 +230,7 @@ function createAuthLink(member) {
   link.query("INSERT INTO users (id, UUID) VALUES ('" + member.id + "', '" + myUUID + "')", (e, r) => {
     if (e) throw e;
   });
-  member.guild.channels.cache.find((c) => c.name === 'foobar').send(`"${member.user.username}" has joined this server`);
+  member.guild.channels.cache.get(Config.Discord.DebugChannelID).send(`"${member.user.username}" has joined this server`);
 }
 
 async function updateUserInfo() {
@@ -236,8 +242,10 @@ async function updateUserInfo() {
         characterInfo = await EsiApi.GetCharacterInfo(r[i].ESI_CHAR_ID);
         corporationInfo = await EsiApi.GetCorporationInfo(characterInfo.corporation_id);
 
-        if (!corporationInfo.alliance_id) corporationInfo.alliance_id = 'null';
-        else allianceInfo = await EsiApi.GetAllianceInfo(corporationInfo.alliance_id);
+        if (!corporationInfo.alliance_id)
+          corporationInfo.alliance_id = 'null';
+        else
+          allianceInfo = await EsiApi.GetAllianceInfo(corporationInfo.alliance_id);
 
         if (r[i].ESI_CORP_ID != characterInfo.corporation_id || r[i].allianceID != corporationInfo.alliance_id) {
           if (corporationInfo.alliance_id !== 'null')

@@ -47,6 +47,10 @@ class EsiApi {
         return (await axios.get(`https://esi.evetech.net/latest/corporations/${corpID}/`, {})).data;
     }
     static async GetAllianceInfo(allianceID) {
+        if(!allianceID){
+            console.error("invalid alliance ID");
+            return;
+        }
         return (await axios.get(`https://esi.evetech.net/latest/alliances/${allianceID}/`, {})).data;
     }
     static async GetStructureInfo(structureID, esiKey) {
