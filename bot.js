@@ -165,6 +165,14 @@ function removeRoles(DiscordID, RoleID) {
   });
 }
 
+function setName(DiscordID, Name) {
+  client.guilds.fetch(config.Discord.ServerID).then((guild) => {
+    guild.members.fetch(DiscordID).then((member) => {
+      member.setNickname(Name);
+    });
+  });
+}
+
 function updateCorpRoles(charID) {
   let corpRole = '0',
     discordID;
@@ -212,6 +220,19 @@ function updateAllianceRoles(charID) {
     if (r.length < 1 || r[0].RoleID === null) return;
 
     addRoles(r[0].DiscordID, r[0].RoleID);
+  });
+}
+
+function updateDiscordName(charID) {
+  // Set the discord display name to the same as the auth'd character name
+
+  let SQL = 'SELECT users.id as DiscordID, users.ESI_CHAR_NAME as CharName from users WHERE users.ESI_CHAR_ID = ' + charID;
+  link.query(SQL, (e, r) => {
+    if (e) throw e;
+
+    if (r.length < 1 || r[0].CharName === null) return;
+
+    setName(r[0].DiscordID, r[0].CharName);
   });
 }
 
@@ -281,6 +302,7 @@ async function updateUserInfo() {
 
           updateCorpRoles(r[i].id);
           updateAllianceRoles(r[i].id);
+          updateDiscordName(r[i].id);
         }
       }
     }
